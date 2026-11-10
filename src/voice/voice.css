@@ -1,0 +1,205 @@
+/* Voice orb + captions (voice agent). Uses tokens from src/style.css. */
+.qv {
+  --lvl: 0;
+  --orb: 76px;
+  --glow: var(--accent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: min(640px, calc(100vw - 32px));
+  pointer-events: none;
+}
+.qv > * { pointer-events: auto; }
+.qv[data-phase='speaking'] { --glow: var(--accent-2); }
+
+/* ---------- captions ---------- */
+.qv-captions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 24px;
+  pointer-events: none;
+  text-align: center;
+}
+.qv-cap,
+.qv-chip {
+  max-width: 100%;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 400ms ease, transform 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  text-wrap: balance;
+}
+.qv-cap.is-visible,
+.qv-chip.is-visible { opacity: 1; transform: none; }
+.qv-cap:empty, .qv-chip:empty { display: none; }
+
+.qv-cap-bot {
+  font-size: 19px;
+  line-height: 1.35;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: rgba(10, 12, 26, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.qv-cap-user {
+  font-size: 15px;
+  line-height: 1.35;
+  color: var(--muted);
+  font-style: italic;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
+}
+.qv-cap-user::before { content: 'you · '; font-style: normal; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+.qv-cap.is-partial { opacity: 0.82; }
+
+.qv-chip {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, rgba(10, 12, 26, 0.7));
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* ---------- orb ---------- */
+.qv-orb-wrap {
+  position: relative;
+  width: var(--orb);
+  height: var(--orb);
+  display: grid;
+  place-items: center;
+}
+.qv-halo,
+.qv-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.qv-halo {
+  background: radial-gradient(circle, color-mix(in srgb, var(--glow) 55%, transparent) 0%, transparent 68%);
+  opacity: calc(0.25 + var(--lvl) * 0.75);
+  transform: scale(calc(1.25 + var(--lvl) * 1.1));
+  transition: background 500ms ease;
+  filter: blur(6px);
+}
+.qv-ring {
+  border: 2px solid color-mix(in srgb, var(--glow) 70%, transparent);
+  opacity: 0;
+}
+.qv-orb {
+  position: relative;
+  width: var(--orb);
+  height: var(--orb);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: #1b1206;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0) 38%),
+    radial-gradient(circle at 50% 120%, #ff8a3d 0%, transparent 60%),
+    linear-gradient(160deg, #ffd27a 0%, var(--accent) 45%, #e0782a 100%);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.45),
+    0 0 calc(18px + var(--lvl) * 40px) color-mix(in srgb, var(--glow) 70%, transparent),
+    inset 0 -6px 14px rgba(120, 50, 0, 0.35);
+  transform: scale(calc(1 + var(--lvl) * 0.08));
+  transition: background 500ms ease, color 300ms ease, box-shadow 120ms linear, filter 200ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.qv-orb:hover { filter: brightness(1.08); }
+.qv-orb:active { transform: scale(0.95); }
+.qv-orb:focus-visible { outline: 2px solid var(--text); outline-offset: 5px; }
+.qv-icon { display: grid; place-items: center; }
+
+/* idle: gentle breathing to invite a tap */
+.qv[data-phase='idle'] .qv-ring { animation: qv-ping 2.6s ease-out infinite; }
+.qv[data-phase='idle'] .qv-halo { animation: qv-breathe 3.2s ease-in-out infinite; }
+
+/* connecting: spinning gradient ring */
+.qv[data-phase='connecting'] .qv-ring {
+  opacity: 1;
+  border: 3px solid transparent;
+  border-top-color: var(--accent);
+  border-right-color: var(--accent-2);
+  inset: -7px;
+  animation: qv-spin 0.9s linear infinite;
+}
+.qv[data-phase='connecting'] .qv-orb { filter: saturate(0.7) brightness(0.9); }
+
+/* live (listening): violet-gold glass */
+.qv[data-phase='live'] .qv-orb,
+.qv[data-phase='speaking'] .qv-orb {
+  color: #fff;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 40%),
+    radial-gradient(circle at 50% 115%, var(--accent) 0%, transparent 62%),
+    linear-gradient(160deg, #a58bff 0%, var(--accent-2) 55%, #3b2a9c 100%);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.45),
+    0 0 calc(18px + var(--lvl) * 50px) color-mix(in srgb, var(--glow) 75%, transparent),
+    inset 0 -6px 14px rgba(20, 10, 70, 0.5);
+}
+.qv[data-phase='live'] .qv-ring { opacity: 0.6; inset: -6px; animation: qv-ping 1.8s ease-out infinite; }
+.qv[data-phase='speaking'] .qv-ring {
+  opacity: calc(0.3 + var(--lvl) * 0.7);
+  inset: calc(-6px - var(--lvl) * 14px);
+  border-color: color-mix(in srgb, var(--accent) 80%, transparent);
+}
+
+.qv[data-phase='disabled'] .qv-orb {
+  cursor: not-allowed;
+  filter: grayscale(1) brightness(0.6);
+}
+.qv[data-phase='disabled'] .qv-halo { opacity: 0.1; }
+
+/* ---------- label ---------- */
+.qv-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  transition: color 300ms ease;
+}
+.qv[data-phase='live'] .qv-label { color: var(--text); }
+.qv[data-phase='speaking'] .qv-label { color: var(--accent); }
+.qv[data-phase='disabled'] .qv-label { color: var(--danger); }
+
+@keyframes qv-ping {
+  0% { transform: scale(1); opacity: 0.55; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+@keyframes qv-breathe {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.55; }
+}
+@keyframes qv-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .qv-ring, .qv-halo { animation: none !important; }
+  .qv-cap, .qv-chip { transition: opacity 200ms ease; transform: none; }
+}
+@media (max-width: 640px) {
+  .qv { --orb: 64px; }
+  .qv-cap-bot { font-size: 16px; }
+}

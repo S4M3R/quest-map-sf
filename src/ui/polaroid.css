@@ -1,0 +1,308 @@
+/* Instant-film prints: scrapbook stack on the right edge (between debug panel and Karl). */
+#polaroids {
+  position: fixed;
+  inset: 0;
+  z-index: 12; /* above itinerary(10), below advisor(15) / voice(20) / debug(30) */
+  pointer-events: none;
+  overflow: hidden;
+}
+.pz-root {
+  --card-w: 216px;
+  --right: 28px;
+  --top: 50%;
+  --anchor-mt: -131px; /* ~half a card's height, so --top is the card centre */
+  --stack-sc: 0.62;
+  --stack-x: 34px; /* scaled cards shrink toward their centre — push them back to the edge */
+  --stack-y: -150px;
+  --hero-tx: -44px;
+  --hero-ty: -36px;
+  --ink: #26305c;
+}
+/* debug panel (?debug=1) owns the top-right corner — slide the scrapbook left of it */
+body:has(#debug > *) .pz-root { --right: 356px; --stack-y: -110px; }
+
+.pz {
+  --tx: 0px;
+  --ty: 0px;
+  --rot: 0deg;
+  --sc: 1;
+  --lift: 0;
+  position: absolute;
+  top: var(--top);
+  right: var(--right);
+  width: var(--card-w);
+  margin-top: var(--anchor-mt);
+  pointer-events: auto;
+  cursor: pointer;
+  outline: none;
+  transform:
+    translate(var(--tx), var(--ty))
+    rotate(calc(var(--rot) * (1 - var(--lift))))
+    scale(calc(var(--sc) * (1 + var(--lift) * 0.16)));
+  transition:
+    transform 720ms cubic-bezier(0.2, 0.9, 0.25, 1.12),
+    opacity 400ms ease,
+    filter 400ms ease;
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+.pz:hover,
+.pz:focus-visible { --lift: 1; z-index: 300 !important; transition-duration: 260ms, 400ms, 400ms; }
+.pz.is-active { --lift: 0.55; z-index: 250 !important; }
+.pz.is-tucked { opacity: 0; pointer-events: none; }
+/* prints from other days peek out behind the active day's stack */
+.pz.is-other:not(.is-tucked) { opacity: 0.55; filter: saturate(0.6) brightness(0.8); }
+.pz.is-other:not(.is-tucked):hover { opacity: 1; filter: none; }
+.pz-root.is-touring .pz:not(.is-active):not(:hover) { filter: brightness(0.62) saturate(0.7); }
+
+/* ---------- the print ---------- */
+.pz-card {
+  position: relative;
+  padding: 11px 11px 0;
+  border-radius: 3px;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 40%),
+    radial-gradient(120% 90% at 30% 10%, #fbf9f2, #efebe0 70%, #e6e1d3);
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.18),
+    0 8px 18px rgba(0, 0, 0, 0.32),
+    0 26px 50px -12px rgba(0, 0, 0, 0.45);
+  transition: box-shadow 400ms ease;
+}
+.pz-card::after {
+  /* paper fibres + soft edge wear */
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(97deg, rgba(120, 100, 60, 0.035) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(7deg, rgba(120, 100, 60, 0.025) 0 1px, transparent 1px 5px);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06), inset 0 0 18px rgba(140, 120, 80, 0.12);
+}
+.pz.is-hero .pz-card {
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.2),
+    0 14px 30px rgba(0, 0, 0, 0.38),
+    0 40px 80px -16px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+.pz.is-active .pz-card {
+  box-shadow:
+    0 0 0 3px var(--day, var(--accent)),
+    0 0 26px 4px color-mix(in srgb, var(--day, #ffb547) 55%, transparent),
+    0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+.pz-photo {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 1px;
+  background: #0d130f;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+.pz-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  filter: brightness(0.3) contrast(0.5) saturate(0) sepia(0.9) hue-rotate(55deg) blur(3px);
+  transform: scale(1.04);
+  transition:
+    opacity 700ms ease,
+    filter 3400ms cubic-bezier(0.35, 0.05, 0.3, 1),
+    transform 3600ms cubic-bezier(0.2, 0.6, 0.3, 1);
+}
+.pz.is-developed .pz-photo img {
+  opacity: 1;
+  filter: brightness(1.03) contrast(1.06) saturate(1.12) sepia(0.14) hue-rotate(0deg) blur(0);
+  transform: scale(1);
+}
+/* image failed everywhere → develops into a soft dusk "photo" instead of a black square */
+.pz.is-blank .pz-photo {
+  background:
+    radial-gradient(60% 40% at 70% 78%, rgba(255, 200, 120, 0.55), transparent 70%),
+    linear-gradient(180deg, #3b3a6e 0%, #b56a7c 55%, #f0a868 78%, #2c2a3f 79%, #1b1a29 100%);
+}
+.pz.is-blank .pz-photo img { display: none; }
+
+/* "date stamp" burned into the corner of the print, in the day's color */
+.pz-stamp {
+  position: absolute;
+  right: 7px;
+  bottom: 6px;
+  z-index: 2;
+  font: 700 12px/1 'Courier New', ui-monospace, monospace;
+  letter-spacing: 0.12em;
+  color: var(--day, #ffb547);
+  text-shadow:
+    0 0 4px color-mix(in srgb, var(--day, #ffb547) 85%, transparent),
+    0 0 10px color-mix(in srgb, var(--day, #ffb547) 55%, transparent),
+    0 1px 1px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transform: rotate(-1deg);
+  transition: opacity 900ms ease 1600ms;
+  pointer-events: none;
+}
+.pz.is-developed .pz-stamp,
+.pz.is-blank .pz-stamp { opacity: 0.95; }
+
+/* chemical wash: greenish-black that clears as the print develops */
+.pz-wash {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(80% 70% at 50% 45%, rgba(70, 92, 66, 0.55), transparent 75%),
+    linear-gradient(160deg, #1c2a20, #0b100c 60%, #1a1d14);
+  background-size: 100% 100%, 100% 100%;
+  opacity: 1;
+  animation: pz-chem 2.4s ease-in-out infinite alternate;
+  transition: opacity 3800ms cubic-bezier(0.5, 0, 0.4, 1) 150ms;
+}
+.pz.is-developed .pz-wash { opacity: 0; animation-play-state: paused; }
+
+/* grain + vignette + a faint warm light leak */
+.pz-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  background:
+    linear-gradient(115deg, rgba(255, 160, 80, 0.22), transparent 38%),
+    radial-gradient(ellipse at center, transparent 52%, rgba(0, 0, 0, 0.5) 100%),
+    repeating-radial-gradient(circle at 13% 27%, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 3px),
+    repeating-radial-gradient(circle at 81% 64%, rgba(0, 0, 0, 0.09) 0 1px, transparent 1px 2px);
+}
+.pz-photo::after {
+  /* vignette without blend so it reads on bright skies too */
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, 0.35);
+}
+
+.pz-cap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 58px;
+  padding: 4px 2px 6px;
+  font-family: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+  color: var(--ink);
+  line-height: 1;
+  text-align: center;
+}
+.pz-name {
+  font-size: 24px;
+  font-weight: 700;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  transform: rotate(-1.2deg);
+}
+.pz-meta {
+  margin-top: 2px;
+  font-size: 19px;
+  font-weight: 600;
+  opacity: 0.72;
+  transform: rotate(0.8deg);
+}
+.pz-meta:empty { display: none; }
+/* handwriting appears a beat after the print comes out */
+.pz.is-new .pz-cap { opacity: 0; }
+.pz-cap { transition: opacity 600ms ease 200ms; }
+
+/* ---------- ejection from the camera slot ---------- */
+.pz-slot {
+  position: absolute;
+  left: -9%;
+  right: -9%;
+  bottom: -7px;
+  height: 14px;
+  z-index: 2;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #3a3c4c 0%, #15161f 45%, #07080c 100%);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  opacity: 0;
+  pointer-events: none;
+}
+.pz.is-new .pz-slot { animation: pz-slot 1050ms ease forwards; }
+.pz.is-new .pz-card { animation: pz-eject 950ms cubic-bezier(0.3, 0.6, 0.35, 1) both; }
+
+@keyframes pz-eject {
+  0% { transform: translateY(100%); clip-path: inset(0 0 100% 0); }
+  12% { transform: translateY(100%); clip-path: inset(0 0 100% 0); }
+  74% { transform: translateY(0); clip-path: inset(0 0 0 0); }
+  86% { transform: translateY(-9px) rotate(-1.5deg); clip-path: inset(-40px -40px -40px -40px); }
+  100% { transform: none; clip-path: inset(-40px -40px -40px -40px); }
+}
+@keyframes pz-slot {
+  0% { opacity: 0; transform: scaleX(0.55); }
+  12% { opacity: 1; transform: scaleX(1); }
+  72% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(10px) scaleX(0.9); }
+}
+@keyframes pz-chem {
+  from { filter: brightness(0.9) hue-rotate(0deg); }
+  to { filter: brightness(1.25) hue-rotate(-12deg); }
+}
+
+/* ---------- interactions + exits ---------- */
+.pz.is-poked .pz-card { animation: pz-poke 420ms ease; }
+@keyframes pz-poke {
+  30% { transform: rotate(-3deg) scale(1.03); }
+  65% { transform: rotate(2deg); }
+}
+.pz.is-flutter .pz-card { animation: pz-flutter 1000ms cubic-bezier(0.4, 0.1, 0.6, 1) var(--leave-delay, 0ms) forwards; }
+.pz.is-swept .pz-card { animation: pz-sweep 750ms cubic-bezier(0.55, 0, 0.75, 0.3) var(--leave-delay, 0ms) forwards; }
+@keyframes pz-flutter {
+  0% { transform: none; opacity: 1; }
+  25% { transform: translate(-26px, 26px) rotate(-16deg); }
+  50% { transform: translate(14px, 90px) rotate(12deg); opacity: 0.85; }
+  75% { transform: translate(-18px, 170px) rotate(-20deg); opacity: 0.5; }
+  100% { transform: translate(6px, 260px) rotate(8deg); opacity: 0; }
+}
+@keyframes pz-sweep {
+  0% { transform: none; opacity: 1; }
+  20% { transform: translate(-14px, -6px) rotate(-4deg); }
+  100% { transform: translate(140%, -60px) rotate(32deg); opacity: 0; }
+}
+
+/* ---------- mobile: small prints in the top-right, clear of the orb ---------- */
+@media (max-width: 640px) {
+  .pz-root {
+    --card-w: 140px;
+    --right: 10px;
+    --top: 64px;
+    --anchor-mt: 0px;
+    --stack-sc: 0.66;
+    --stack-x: 22px;
+    --stack-y: -18px;
+    --hero-tx: -24px;
+    --hero-ty: 40px;
+  }
+  .pz-card { padding: 7px 7px 0; }
+  .pz-cap { min-height: 38px; }
+  .pz-name { font-size: 18px; }
+  .pz-meta { font-size: 14px; }
+  .pz-stamp { font-size: 9px; right: 5px; bottom: 4px; }
+  body:has(#debug > *) .pz-root { --right: 10px; --top: 120px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pz { transition: opacity 200ms ease; }
+  .pz.is-new .pz-card,
+  .pz.is-new .pz-slot,
+  .pz.is-poked .pz-card,
+  .pz-wash { animation: none; }
+  .pz.is-flutter .pz-card,
+  .pz.is-swept .pz-card { animation: none; opacity: 0; }
+  .pz-photo img { transition: opacity 600ms ease, filter 900ms ease; }
+}
+.pz.is-picked { --lift: 0.45; }

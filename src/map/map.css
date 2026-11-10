@@ -1,0 +1,304 @@
+/* Quest Map — map scene styles (map agent). */
+
+/* ---------- missing token fallback ---------- */
+.qm-missing {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(1200px 600px at 70% 20%, rgba(124, 92, 255, 0.25), transparent 60%),
+    radial-gradient(900px 500px at 20% 90%, rgba(255, 181, 71, 0.15), transparent 60%),
+    var(--bg, #0b0d17);
+  color: var(--text, #eef0ff);
+  font-family: var(--font, system-ui, sans-serif);
+  text-align: center;
+}
+.qm-missing__card {
+  max-width: 420px;
+  padding: 28px 28px 24px;
+  border-radius: 18px;
+  background: rgba(14, 16, 32, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+.qm-missing__glyph { font-size: 34px; color: var(--accent, #ffb547); text-shadow: 0 0 18px rgba(255, 181, 71, 0.7); }
+.qm-missing h2 { margin: 10px 0 6px; font-size: 18px; letter-spacing: 0.02em; }
+.qm-missing p { margin: 0; color: var(--muted, #9aa0c3); font-size: 14px; line-height: 1.5; }
+.qm-missing code { color: var(--accent, #ffb547); font-size: 13px; }
+
+/* ---------- default control clutter ---------- */
+.mapboxgl-ctrl-logo { opacity: 0.55; }
+.mapboxgl-ctrl-attrib.mapboxgl-compact { opacity: 0.6; }
+.mapboxgl-ctrl-bottom-right { z-index: 5; }
+
+/* ---------- quest markers ---------- */
+.qm-marker {
+  /* mapbox owns transform on this element — never animate it */
+  width: 0;
+  height: 0;
+  overflow: visible;
+  cursor: pointer;
+  z-index: 1;
+}
+.qm-marker.is-active { z-index: 3; }
+
+.qm-pin {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+  animation: qm-drop 720ms cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+}
+.qm-marker.is-leaving .qm-pin { animation: qm-leave 260ms ease-in forwards; }
+
+/* light beam rising from the ground */
+.qm-pin__beam {
+  position: absolute;
+  left: -2px;
+  bottom: 0;
+  width: 4px;
+  height: 46px;
+  border-radius: 4px;
+  background: linear-gradient(to top, color-mix(in srgb, var(--pin, #ffb547) 95%, transparent), color-mix(in srgb, var(--pin, #ffb547) 0%, transparent));
+  filter: blur(0.5px);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--pin, #ffb547) 65%, transparent);
+}
+
+/* ground glow dot */
+.qm-pin__base {
+  position: absolute;
+  left: -7px;
+  bottom: -5px;
+  width: 14px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--pin, #ffb547) 55%, white), color-mix(in srgb, var(--pin, #ffb547) 60%, transparent) 55%, color-mix(in srgb, var(--pin, #ffb547) 0%, transparent));
+}
+
+/* shockwave on landing */
+.qm-pin__shock {
+  position: absolute;
+  left: -40px;
+  bottom: -14px;
+  width: 80px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--pin, #ffb547) 90%, transparent);
+  opacity: 0;
+  animation: qm-shock 900ms ease-out 380ms both;
+  pointer-events: none;
+}
+
+/* numbered badge (diamond) */
+.qm-pin__badge {
+  position: absolute;
+  left: -17px;
+  bottom: 44px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+}
+.qm-pin__badge::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  transform: rotate(45deg);
+  border-radius: 7px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--pin, #ffb547) 60%, white) 0%, var(--pin, #ffb547) 45%, color-mix(in srgb, var(--pin, #ffb547) 78%, black) 100%);
+  border: 2px solid rgba(255, 245, 220, 0.95);
+  box-shadow:
+    0 0 0 3px rgba(20, 14, 40, 0.55),
+    0 0 18px color-mix(in srgb, var(--pin, #ffb547) 85%, transparent),
+    0 6px 14px rgba(0, 0, 0, 0.45);
+}
+.qm-pin__num {
+  position: relative;
+  font: 800 15px/1 var(--font, system-ui, sans-serif);
+  color: #2a1600;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+  font-variant-numeric: tabular-nums;
+}
+
+/* pulse ring around badge when active */
+.qm-pin__pulse {
+  position: absolute;
+  left: -26px;
+  bottom: 35px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--pin, #ffb547) 90%, transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+.qm-marker.is-active .qm-pin__pulse { animation: qm-pulse 1.6s ease-out infinite; }
+.qm-marker.is-active .qm-pin__badge { animation: qm-bob 1.6s ease-in-out infinite; }
+.qm-marker.is-active .qm-pin__beam { height: 64px; box-shadow: 0 0 20px color-mix(in srgb, var(--pin, #ffb547) 90%, transparent); }
+.qm-marker.is-active .qm-pin__badge,
+.qm-marker.is-active .qm-pin__pulse { bottom: 62px; }
+.qm-marker.is-active .qm-pin__pulse { bottom: 53px; }
+
+/* name label */
+.qm-pin__label {
+  position: absolute;
+  left: 22px;
+  bottom: 50px;
+  max-width: 220px;
+  padding: 5px 10px 5px 9px;
+  border-radius: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: 700 12.5px/1.2 var(--font, system-ui, sans-serif);
+  letter-spacing: 0.01em;
+  color: var(--text, #eef0ff);
+  background: rgba(14, 16, 32, 0.82);
+  border: 1px solid color-mix(in srgb, var(--pin, #ffb547) 35%, transparent);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: border-color 200ms ease, transform 200ms ease, bottom 200ms ease;
+  animation: qm-label-in 420ms ease-out 420ms both;
+}
+.qm-pin__label small {
+  display: block;
+  margin-top: 2px;
+  font-weight: 600;
+  font-size: 10.5px;
+  color: var(--pin, #ffb547);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.qm-marker.is-active .qm-pin__label {
+  bottom: 68px;
+  border-color: color-mix(in srgb, var(--pin, #ffb547) 90%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--pin, #ffb547) 25%, transparent), 0 0 22px color-mix(in srgb, var(--pin, #ffb547) 35%, transparent), 0 8px 22px rgba(0, 0, 0, 0.4);
+}
+.qm-marker:hover .qm-pin__label { border-color: color-mix(in srgb, var(--pin, #ffb547) 80%, transparent); }
+
+/* other days: still visible, but smaller and quieter than the day being planned */
+.qm-marker.is-dim { z-index: 0; }
+.qm-marker.is-dim .qm-pin__inner { transform: scale(0.62); opacity: 0.5; filter: saturate(0.7); }
+.qm-marker.is-dim .qm-pin__label { visibility: hidden; }
+.qm-marker.is-dim:hover .qm-pin__label { visibility: visible; }
+.qm-marker.is-dim:hover .qm-pin__inner { opacity: 0.9; }
+.qm-pin__inner {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+  transition: transform 380ms cubic-bezier(0.2, 0.9, 0.3, 1.2), opacity 300ms ease, filter 300ms ease;
+}
+
+@keyframes qm-drop {
+  0% { transform: translateY(-140px) scale(0.6); opacity: 0; }
+  55% { transform: translateY(6px) scale(1.06); opacity: 1; }
+  75% { transform: translateY(-4px) scale(0.98); }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes qm-leave {
+  to { transform: translateY(-30px) scale(0.4); opacity: 0; }
+}
+@keyframes qm-shock {
+  0% { transform: scale(0.2); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+@keyframes qm-pulse {
+  0% { transform: scale(0.7); opacity: 0.9; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+@keyframes qm-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@keyframes qm-label-in {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qm-pin, .qm-pin__shock, .qm-pin__label { animation-duration: 1ms; }
+  .qm-marker.is-active .qm-pin__pulse, .qm-marker.is-active .qm-pin__badge { animation: none; }
+}
+
+/* ---------- show_options ghost pins (A/B/C candidates, not real stops) ---------- */
+.qm-ghost { width: 0; height: 0; overflow: visible; cursor: pointer; z-index: 2; }
+.qm-ghost__pin {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  animation: qm-ghost-in 520ms cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+  transition: transform 220ms ease, opacity 300ms ease;
+}
+.qm-ghost.is-leaving .qm-ghost__pin { animation: qm-ghost-out 400ms ease forwards; }
+.qm-ghost__stem {
+  position: absolute;
+  left: -1px;
+  bottom: 0;
+  width: 2px;
+  height: 36px;
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0));
+}
+.qm-ghost__ring {
+  position: absolute;
+  left: -22px;
+  bottom: -11px;
+  width: 44px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--pin, #ffb547);
+  animation: qm-ghost-ring 1.8s ease-out infinite;
+  pointer-events: none;
+}
+.qm-ghost__badge {
+  position: absolute;
+  left: -16px;
+  bottom: 34px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.72);
+  border: 2px dashed var(--pin, #ffb547);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--pin, #ffb547) 55%, transparent), 0 6px 14px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  font: 850 15px/1 var(--font, system-ui, sans-serif);
+  color: #151826;
+  transition: transform 220ms cubic-bezier(0.3, 1.6, 0.5, 1), background-color 200ms ease;
+}
+.qm-ghost__label {
+  position: absolute;
+  left: 20px;
+  bottom: 38px;
+  max-width: 180px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: 650 11.5px/1.2 var(--font, system-ui, sans-serif);
+  color: var(--text, #eef0ff);
+  background: rgba(14, 16, 32, 0.6);
+  border: 1px dashed color-mix(in srgb, var(--pin, #ffb547) 60%, transparent);
+  opacity: 0.85;
+}
+.qm-ghost:hover .qm-ghost__badge,
+.qm-ghost.is-hot .qm-ghost__badge { transform: scale(1.3); background: var(--pin, #ffb547); border-style: solid; border-color: #fff; }
+.qm-ghost.is-hot { z-index: 4; }
+.qm-ghost.is-hot .qm-ghost__label { opacity: 1; border-style: solid; border-color: var(--pin, #ffb547); }
+@keyframes qm-ghost-in { from { opacity: 0; transform: translateY(-30px) scale(0.6); } to { opacity: 1; transform: none; } }
+@keyframes qm-ghost-out { to { opacity: 0; transform: scale(0.5); } }
+@keyframes qm-ghost-ring { 0% { transform: scale(0.6); opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .qm-ghost__ring { animation: none; }
+}

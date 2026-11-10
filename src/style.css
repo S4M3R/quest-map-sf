@@ -1,0 +1,25 @@
+/* Base layout + design tokens (lead). Feature CSS lives next to each module. */
+:root {
+  --bg: #0b0d17;
+  --panel: rgba(14, 16, 32, 0.78);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --text: #eef0ff;
+  --muted: #9aa0c3;
+  --accent: #ffb547;      /* quest gold */
+  --accent-2: #7c5cff;    /* route violet */
+  --danger: #ff5c7a;
+  --radius: 14px;
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); overflow: hidden; }
+#map { position: fixed; inset: 0; }
+#itinerary { position: fixed; top: 16px; left: 16px; bottom: 16px; width: min(340px, calc(100vw - 32px)); pointer-events: none; z-index: 10; }
+#itinerary > * { pointer-events: auto; }
+#voice { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 20; }
+#debug { position: fixed; top: 16px; right: 16px; z-index: 30; }
+#toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 40; }
+.panel { background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+@media (max-width: 640px) {
+  #itinerary { top: auto; bottom: 120px; height: 40vh; }
+}

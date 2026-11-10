@@ -1,0 +1,176 @@
+/* Onboarding — Karl the Fog's first-run intro. Owns #onboarding; repositions #advisor via body.ob-on. */
+:root {
+  --ob-karl: 320px;            /* Karl stage size while featured */
+  --ob-karl-x: 36vw;           /* Karl center x */
+  --ob-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------- Karl repositioning (advisor renderer has a ResizeObserver → crisp at any size) ---------- */
+body.ob-anim #advisor { transition: right 0.9s var(--ob-ease), bottom 0.9s var(--ob-ease); }
+body.ob-anim #advisor .adv-stage { transition: width 0.9s var(--ob-ease), height 0.9s var(--ob-ease), transform 0.25s var(--ob-ease); }
+body.ob-on #advisor {
+  z-index: 56;
+  right: calc(100vw - var(--ob-karl-x) - var(--ob-karl) / 2);
+  bottom: calc(50vh - var(--ob-karl) / 2 - 10px);
+}
+body.ob-on #advisor .adv-stage { width: var(--ob-karl); height: var(--ob-karl); }
+body.ob-on #advisor .adv-tag { opacity: 0; transition: opacity 0.3s; }
+
+/* ---------- replay button ---------- */
+.ob-replay {
+  position: fixed; top: 16px; right: 16px; z-index: 25;
+  display: flex; align-items: center; gap: 0; height: 34px; min-width: 34px; padding: 0 9px;
+  border-radius: 999px; border: 1px solid var(--panel-border); background: var(--panel); color: var(--muted);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  font: 600 14px/1 var(--font); cursor: pointer; overflow: hidden;
+  transition: color 0.2s, border-color 0.2s, opacity 0.3s, gap 0.25s var(--ob-ease);
+}
+.ob-replay-q { font-family: Caveat, cursive; font-size: 22px; color: var(--accent); line-height: 1; }
+.ob-replay-txt { max-width: 0; opacity: 0; white-space: nowrap; transition: max-width 0.3s var(--ob-ease), opacity 0.2s; font-size: 12px; }
+.ob-replay:hover, .ob-replay:focus-visible { color: var(--text); border-color: rgba(255, 181, 71, 0.45); gap: 6px; outline: none; }
+.ob-replay:hover .ob-replay-txt, .ob-replay:focus-visible .ob-replay-txt { max-width: 120px; opacity: 1; }
+body:has(#debug > *) .ob-replay { top: auto; bottom: 24px; right: auto; left: 16px; }
+.ob-host.is-open .ob-replay { opacity: 0; pointer-events: none; }
+
+/* ---------- overlay ---------- */
+.ob-root { position: fixed; inset: 0; z-index: 50; pointer-events: none; visibility: hidden; opacity: 0; transition: opacity 0.5s var(--ob-ease), visibility 0s 0.5s; }
+.ob-root.is-open { pointer-events: auto; visibility: visible; opacity: 1; transition: opacity 0.5s var(--ob-ease); }
+.ob-veil {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 70% at var(--ob-karl-x) 50%, rgba(124, 92, 255, 0.16), transparent 70%),
+    radial-gradient(ellipse 120% 90% at 50% 50%, rgba(11, 13, 23, 0.25) 30%, rgba(11, 13, 23, 0.82) 100%);
+  transition: opacity 0.6s var(--ob-ease);
+}
+.ob-root.is-touring .ob-veil { opacity: 0.55; }
+.ob-root.has-spot .ob-veil { opacity: 0; }
+
+/* spotlight: a hole cut via a giant shadow */
+.ob-spot {
+  position: absolute; left: 50%; top: 50%; width: 0; height: 0; border-radius: 18px;
+  box-shadow: 0 0 0 200vmax rgba(8, 9, 18, 0.7), 0 0 0 2px var(--accent), 0 0 34px 6px rgba(255, 181, 71, 0.35);
+  opacity: 0; pointer-events: none;
+  transition: left 0.6s var(--ob-ease), top 0.6s var(--ob-ease), width 0.6s var(--ob-ease), height 0.6s var(--ob-ease), opacity 0.4s;
+}
+.ob-root.has-spot .ob-spot { opacity: 1; }
+.ob-spot-label {
+  position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%);
+  padding: 2px 12px; border-radius: 999px; white-space: nowrap;
+  font: 700 22px/1.2 Caveat, cursive; color: #1b1405; background: var(--accent);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+.ob-spot-label::after {
+  content: ''; position: absolute; left: 50%; top: 100%; transform: translateX(-50%);
+  border: 7px solid transparent; border-top-color: var(--accent);
+}
+.ob-spot-label.is-below { bottom: auto; top: calc(100% + 10px); }
+.ob-spot-label.is-below::after { top: auto; bottom: 100%; border-top-color: transparent; border-bottom-color: var(--accent); }
+
+/* top bar */
+.ob-top { position: absolute; top: 16px; right: 16px; left: 16px; display: flex; align-items: center; justify-content: flex-end; gap: 10px; z-index: 2; }
+.ob-progress { flex: 0 1 160px; height: 4px; border-radius: 4px; background: rgba(255, 255, 255, 0.12); overflow: hidden; margin-right: auto; margin-left: auto; }
+.ob-progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent-2), var(--accent)); border-radius: inherit; transition: width 0.6s var(--ob-ease); }
+.ob-iconbtn, .ob-skip {
+  height: 34px; border-radius: 999px; border: 1px solid var(--panel-border); background: var(--panel); color: var(--text);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); cursor: pointer; font: 600 13px/1 var(--font);
+}
+.ob-iconbtn { width: 34px; font-size: 15px; }
+.ob-skip { padding: 0 14px; color: var(--muted); }
+.ob-skip:hover, .ob-iconbtn:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.25); }
+
+/* ---------- Karl's speech bubble ---------- */
+.ob-bubble {
+  position: absolute; z-index: 3;
+  left: calc(var(--ob-karl-x) + var(--ob-karl) / 2 - 6px); top: 50%; transform: translateY(-50%);
+  width: min(470px, calc(100vw - var(--ob-karl-x) - var(--ob-karl) / 2 - 24px));
+  padding: 18px 20px 18px; border-radius: 20px;
+  background: linear-gradient(160deg, rgba(30, 30, 58, 0.9), rgba(14, 16, 32, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+}
+.ob-bubble::before { /* tail pointing at Karl */
+  content: ''; position: absolute; left: -9px; top: 50%; width: 18px; height: 18px; transform: translateY(-50%) rotate(45deg);
+  background: rgba(26, 27, 52, 0.92); border-left: 1px solid rgba(255, 255, 255, 0.12); border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.ob-bubble.is-pop { animation: ob-pop 0.35s var(--ob-ease); }
+@keyframes ob-pop { from { transform: translateY(-50%) scale(0.97); opacity: 0.6; } to { transform: translateY(-50%) scale(1); opacity: 1; } }
+.ob-name {
+  position: absolute; top: -16px; left: 18px; padding: 0 12px; border-radius: 999px;
+  font: 700 24px/1.25 Caveat, cursive; color: #1b1405; background: var(--accent);
+  transform: rotate(-3deg); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.ob-text { min-height: 2.6em; font-size: 19px; line-height: 1.4; font-weight: 520; color: var(--text); text-wrap: pretty; cursor: default; }
+.ob-text em { font-style: italic; color: var(--accent); }
+.ob-ctrl { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-top: 14px; }
+.ob-ctrl:empty { display: none; }
+
+/* chips */
+.ob-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.ob-chip {
+  position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 16px;
+  border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(255, 255, 255, 0.06); color: var(--text);
+  font: 650 16px/1 var(--font); cursor: pointer;
+  animation: ob-chip-in 0.4s var(--ob-ease) both; animation-delay: calc(var(--i, 0) * 40ms);
+  transition: background 0.15s, border-color 0.15s, transform 0.15s var(--ob-ease), box-shadow 0.15s;
+}
+.ob-chip:hover { background: rgba(255, 255, 255, 0.11); border-color: rgba(255, 255, 255, 0.28); transform: translateY(-1px); }
+.ob-chip:active { transform: scale(0.96); }
+.ob-chip:focus-visible, .ob-next:focus-visible, .ob-ghost:focus-visible, .ob-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ob-chip.is-on { background: rgba(255, 181, 71, 0.18); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.ob-chip-emoji { font-size: 20px; }
+.ob-chip kbd { font: 600 10px/1 var(--font); color: var(--muted); opacity: 0.6; padding: 2px 4px; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 4px; }
+@media (hover: none) { .ob-chip kbd { display: none; } }
+@keyframes ob-chip-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.ob-next, .ob-ghost {
+  min-height: 42px; padding: 0 18px; border-radius: 12px; font: 700 15px/1 var(--font); cursor: pointer;
+  transition: transform 0.15s var(--ob-ease), filter 0.15s, background 0.15s;
+}
+.ob-next { border: 0; color: #1b1405; background: linear-gradient(135deg, #ffc768, var(--accent)); box-shadow: 0 6px 18px rgba(255, 181, 71, 0.3); }
+.ob-next:hover { filter: brightness(1.06); transform: translateY(-1px); }
+.ob-next:active, .ob-ghost:active { transform: scale(0.97); }
+.ob-ghost { border: 1px solid rgba(255, 255, 255, 0.16); background: transparent; color: var(--muted); }
+.ob-ghost:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.3); }
+
+.ob-form { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+.ob-input {
+  flex: 1 1 180px; min-height: 46px; padding: 0 14px; border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(255, 255, 255, 0.06); color: var(--text); font: 500 17px var(--font);
+}
+.ob-input::placeholder { color: var(--muted); }
+
+.ob-summary {
+  width: 100%; padding: 12px 14px; border-radius: 14px;
+  background: linear-gradient(135deg, rgba(124, 92, 255, 0.18), rgba(255, 181, 71, 0.12)); border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.ob-summary-k { font: 700 22px/1.1 Caveat, cursive; color: var(--accent); }
+.ob-summary-v { margin-top: 4px; font-size: 15px; font-weight: 600; color: var(--text); }
+.ob-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.ob-cta { min-height: 48px; font-size: 16px; }
+
+/* ---------- mid widths: keep Karl clear of the bubble ---------- */
+@media (max-width: 980px) and (min-width: 641px) {
+  :root { --ob-karl: 260px; --ob-karl-x: 30vw; }
+}
+
+/* ---------- mobile: Karl small at top, bubble + chips at bottom ---------- */
+@media (max-width: 640px) {
+  :root { --ob-karl: 160px; }
+  body.ob-on #advisor { right: calc(50vw - var(--ob-karl) / 2); bottom: calc(100vh - var(--ob-karl) - 64px); bottom: calc(100dvh - var(--ob-karl) - 64px); }
+  .ob-veil { background: radial-gradient(ellipse 90% 50% at 50% 20%, rgba(124, 92, 255, 0.18), transparent 70%), linear-gradient(180deg, rgba(11, 13, 23, 0.35), rgba(11, 13, 23, 0.85)); }
+  .ob-bubble { left: 12px; right: 12px; top: auto; bottom: 12px; width: auto; transform: none; max-height: 62vh; overflow-y: auto; padding: 20px 16px 16px; }
+  .ob-bubble::before { display: none; }
+  .ob-name { position: static; display: inline-block; margin: -4px 0 8px; font-size: 22px; }
+  .ob-bubble.is-pop { animation-name: ob-pop-m; }
+  .ob-text { font-size: 17px; }
+  .ob-chip { min-height: 44px; padding: 0 13px; font-size: 15px; }
+  .ob-progress { flex-basis: 90px; margin-left: 0; }
+  .ob-replay { top: 12px; right: 12px; }
+}
+@keyframes ob-pop-m { from { transform: translateY(6px); opacity: 0.6; } to { transform: none; opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  body.ob-anim #advisor, body.ob-anim #advisor .adv-stage, .ob-root, .ob-spot, .ob-veil, .ob-progress i { transition: none !important; }
+  .ob-bubble.is-pop, .ob-chip { animation: none !important; }
+}

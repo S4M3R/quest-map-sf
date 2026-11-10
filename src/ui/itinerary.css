@@ -1,0 +1,390 @@
+/* Quest Log — itinerary panel. Tokens from src/style.css. */
+.ql {
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  overflow: hidden;
+  padding: 16px 14px 12px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background:
+    radial-gradient(120% 60% at 0% 0%, rgba(255, 181, 71, 0.10), transparent 60%),
+    radial-gradient(100% 50% at 100% 100%, rgba(124, 92, 255, 0.12), transparent 60%),
+    var(--panel);
+}
+
+/* ---------- header ---------- */
+.ql-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 4px 12px;
+  border-bottom: 1px solid var(--panel-border);
+}
+.ql-eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.9;
+}
+.ql-title {
+  margin: 2px 0 0;
+  font-size: 21px;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+.ql-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  flex-shrink: 0;
+}
+.ql-count {
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.ql-mood {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(124, 92, 255, 0.16);
+  border: 1px solid rgba(124, 92, 255, 0.35);
+  color: #d9d1ff;
+  white-space: nowrap;
+}
+
+/* ---------- profile + day tabs ---------- */
+.ql-profile {
+  padding: 8px 4px 0;
+  font-size: 11.5px;
+  color: var(--muted);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ql-profile[hidden] { display: none; }
+.ql-days {
+  display: flex;
+  gap: 6px;
+  padding: 10px 2px 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+.ql-days::-webkit-scrollbar { display: none; }
+.ql-day {
+  --day: #ffb547;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  max-width: 220px;
+  padding: 5px 9px 5px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--day) 30%, transparent);
+  background: color-mix(in srgb, var(--day) 8%, transparent);
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 120ms ease;
+}
+.ql-day:hover { color: var(--text); border-color: color-mix(in srgb, var(--day) 60%, transparent); }
+.ql-day:active { transform: scale(0.96); }
+.ql-day:focus-visible { outline: 2px solid var(--day); outline-offset: 2px; }
+.ql-day.is-active {
+  color: #10121e;
+  background: var(--day);
+  border-color: var(--day);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--day) 45%, transparent);
+}
+.ql-day-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--day); flex-shrink: 0; }
+.ql-day.is-active .ql-day-dot { background: #10121e; }
+.ql-day-label { white-space: nowrap; }
+.ql-day-title {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.ql-day-title::before { content: '· '; opacity: 0.6; }
+/* keep several chips on one row: only the active day shows its full title */
+.ql-day:not(.is-active) .ql-day-title { display: none; }
+.ql-day.is-active .ql-day-title { max-width: 150px; }
+.ql-day-count {
+  min-width: 18px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  background: rgba(255, 255, 255, 0.08);
+}
+.ql-day.is-active .ql-day-count { background: rgba(16, 18, 30, 0.18); }
+.ql-day-add {
+  justify-content: center;
+  width: 28px;
+  padding: 5px 0;
+  font-size: 15px;
+  line-height: 1;
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.22);
+  background: transparent;
+}
+.ql-dayhead {
+  margin: 8px 4px 0;
+  font-size: 10.5px;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--day, var(--accent));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ql.is-trip-empty .ql-dayhead { display: none; }
+
+/* ---------- touring banner ---------- */
+.ql-banner {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 2px 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent);
+  background: linear-gradient(90deg, rgba(255, 181, 71, 0.16), rgba(124, 92, 255, 0.12));
+  border: 1px solid rgba(255, 181, 71, 0.28);
+}
+.ql.is-touring .ql-banner { display: flex; animation: ql-fade-in 260ms ease-out; }
+.ql-banner-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 rgba(255, 181, 71, 0.6);
+  animation: ql-ping 1.4s ease-out infinite;
+}
+
+/* ---------- list ---------- */
+.ql-list {
+  list-style: none;
+  margin: 0;
+  padding: 10px 2px 2px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+.ql.is-empty .ql-list { display: none; }
+
+.ql-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: 12px;
+  padding: 10px 10px 10px 8px;
+  margin-bottom: 6px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+/* dotted route line connecting badges */
+.ql-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 21px;
+  top: 40px;
+  bottom: -8px;
+  width: 2px;
+  background: repeating-linear-gradient(to bottom, color-mix(in srgb, var(--day, #7c5cff) 60%, transparent) 0 4px, transparent 4px 8px);
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .ql-item:hover { background: rgba(255, 255, 255, 0.045); }
+}
+.ql-item:focus-visible { border-color: rgba(255, 181, 71, 0.6); }
+.ql-item:active { transform: scale(0.985); }
+.ql-item.is-active {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--day, #ffb547) 15%, transparent), color-mix(in srgb, var(--day, #ffb547) 3%, transparent));
+  border-color: color-mix(in srgb, var(--day, #ffb547) 40%, transparent);
+}
+
+.ql-badge {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #2a1a00;
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--day, #ffb547) 45%, white), var(--day, #ffb547) 55%, color-mix(in srgb, var(--day, #ffb547) 80%, black));
+  box-shadow: 0 0 0 2px rgba(11, 13, 23, 0.9), 0 0 14px color-mix(in srgb, var(--day, #ffb547) 45%, transparent);
+  position: relative;
+  z-index: 1;
+}
+.ql-item.is-active .ql-badge {
+  box-shadow: 0 0 0 2px rgba(11, 13, 23, 0.9), 0 0 0 4px color-mix(in srgb, var(--day, #ffb547) 35%, transparent), 0 0 22px color-mix(in srgb, var(--day, #ffb547) 70%, transparent);
+}
+
+.ql-lead { display: flex; align-items: flex-start; gap: 9px; }
+.ql-thumb {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+.ql-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 1;
+  transition: opacity 400ms ease;
+}
+.ql-thumb.is-loading img { opacity: 0; }
+.ql-thumb.is-loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.14) 50%, transparent 80%);
+  background-size: 220% 100%;
+  animation: ql-shimmer 1.2s linear infinite;
+}
+.ql-thumb.is-failed {
+  background:
+    radial-gradient(60% 40% at 70% 78%, rgba(255, 200, 120, 0.5), transparent 70%),
+    linear-gradient(180deg, #3b3a6e 0%, #b56a7c 55%, #f0a868 78%, #2c2a3f 79%, #1b1a29 100%);
+}
+.ql-thumb.is-failed img { display: none; }
+@keyframes ql-shimmer { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+
+.ql-body { min-width: 0; }
+.ql-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 18px;
+}
+.ql-emoji { font-size: 14px; line-height: 1; }
+.ql-time {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.ql-name {
+  margin-top: 2px;
+  font-size: 14.5px;
+  font-weight: 650;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.ql-note {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ql-addr { font-style: italic; opacity: 0.8; }
+
+.ql-link {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-top: 1px;
+  border-radius: 8px;
+  color: var(--muted);
+  transition: color 150ms ease, background-color 150ms ease;
+}
+.ql-link:hover, .ql-link:focus-visible { color: var(--accent); background: rgba(255, 181, 71, 0.12); outline: none; }
+
+/* ---------- enter / leave / pulse ---------- */
+.ql-item.is-entering { animation: ql-enter 420ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.ql-item.is-entering .ql-badge { animation: ql-pop 520ms cubic-bezier(0.3, 1.6, 0.5, 1) both; }
+.ql-item.is-pulse .ql-badge { animation: ql-pop 420ms cubic-bezier(0.3, 1.6, 0.5, 1); }
+.ql-item.is-leaving {
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(-16px);
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  transition: opacity 200ms ease, transform 220ms ease, height 300ms ease 80ms, margin 300ms ease 80ms, padding 300ms ease 80ms;
+}
+.ql-item.is-leaving::after { display: none; }
+
+@keyframes ql-enter {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes ql-pop {
+  0% { transform: scale(0.4); }
+  60% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+@keyframes ql-fade-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@keyframes ql-ping {
+  0% { box-shadow: 0 0 0 0 rgba(255, 181, 71, 0.6); }
+  100% { box-shadow: 0 0 0 9px rgba(255, 181, 71, 0); }
+}
+
+/* ---------- empty state ---------- */
+.ql-empty {
+  display: none;
+  text-align: center;
+  padding: 26px 12px 18px;
+}
+.ql.is-empty .ql-empty { display: block; animation: ql-fade-in 300ms ease-out; }
+.ql-empty-glyph {
+  font-size: 34px;
+  filter: drop-shadow(0 4px 14px rgba(255, 181, 71, 0.35));
+  animation: ql-float 3.2s ease-in-out infinite;
+}
+.ql-empty-title { margin: 10px 0 4px; font-size: 14.5px; font-weight: 650; }
+.ql-empty-hint { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+.ql-empty-hint em { color: var(--accent); font-style: normal; font-weight: 600; }
+@keyframes ql-float { 50% { transform: translateY(-4px); } }
+
+/* ---------- mobile: container is a 40vh bottom sheet ---------- */
+@media (max-width: 640px) {
+  .ql { padding: 12px 10px 8px; height: 100%; }
+  .ql-title { font-size: 18px; }
+  .ql-thumb { width: 36px; height: 36px; }
+  .ql-day-title { display: none; }
+  .ql-empty { padding: 14px 8px 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ql *, .ql { animation: none !important; transition: none !important; }
+}

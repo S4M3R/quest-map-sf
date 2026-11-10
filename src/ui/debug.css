@@ -1,0 +1,82 @@
+/* Debug panel (voice agent) — compact, dev-only. */
+.qd {
+  width: min(320px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  color: var(--text);
+  overflow: hidden;
+}
+.qd-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px 8px 12px;
+  border-bottom: 1px solid var(--panel-border);
+  letter-spacing: 0.04em;
+}
+.qd-min {
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font-size: 16px;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+}
+.qd-min:hover { background: rgba(255, 255, 255, 0.08); color: var(--text); }
+.qd.is-collapsed .qd-body { display: none; }
+.qd.is-collapsed .qd-head { border-bottom: 0; }
+
+.qd-body { overflow-y: auto; padding: 4px 10px 10px; display: flex; flex-direction: column; gap: 8px; }
+.qd-sec { display: flex; flex-direction: column; gap: 4px; }
+.qd-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-top: 4px; }
+.qd-row { display: flex; flex-wrap: wrap; gap: 4px; }
+.qd-row.qd-col { flex-direction: column; flex-wrap: nowrap; }
+
+.qd-btn {
+  font: inherit;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 5px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.qd-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
+.qd-btn:disabled { opacity: 0.5; cursor: progress; }
+.qd-primary { background: var(--accent); color: #1b1206; border-color: transparent; font-weight: 700; }
+.qd-primary:hover:not(:disabled) { background: #ffc56b; }
+.qd-primary.is-running { background: var(--accent-2); color: #fff; opacity: 1; }
+.qd-danger { color: var(--danger); }
+
+.qd-form { display: flex; gap: 4px; }
+.qd-form input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 5px 8px;
+}
+.qd-form input.qd-small { flex: 0 0 64px; }
+.qd-form input:focus { outline: 1px solid var(--accent-2); }
+
+.qd-out {
+  margin: 4px 0 0;
+  padding: 8px;
+  max-height: 220px;
+  overflow: auto;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 8px;
+  font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #b9f5c8;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.qd-out.is-err { color: var(--danger); }
